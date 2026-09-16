@@ -4,15 +4,8 @@ use bevy_ecs::prelude::*;
 
 pub mod prelude {
     pub use crate::{
-        entity_state,
-        change_state,
-        trigger_change_state,
-        trigger_enter_state,
-        trigger_exit_state,
-        EntityState,
-        EntityStateMarker,
-        EnterState,
-        ExitState
+        EnterState, EntityState, EntityStateMarker, ExitState, change_state, entity_state, trigger_change_state,
+        trigger_enter_state, trigger_exit_state,
     };
 }
 
