@@ -113,6 +113,7 @@ where
 }
 
 /// Triggers all the events needed for a state transition
+/// between two states
 #[allow(unused)]
 pub fn trigger_change_state<
     B: Bundle,
@@ -142,7 +143,7 @@ pub fn trigger_enter_state<
     commands.trigger(EnterState::<B, E, NextMarker>::new(entity));
 }
 
-/// Triggers all the events needed for a state exit
+/// Triggers all the events needed for a state exit into no state
 #[allow(unused)]
 pub fn trigger_exit_state<
     B: Bundle,
