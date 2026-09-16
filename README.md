@@ -69,7 +69,7 @@ fn test(mut commands: Commands) {
     trigger_enter_state::<Markers, States, Idle>(entity, &mut commands);
 }
 
-// ENTER STATE SYSTEMS.  You could put these in a different plugin or move the functions to a different file
+// IDLE STATE SYSTEMS.  You could put these in a different plugin or move the functions to a different file
 
 fn on_enter_idle(event: On<EnterState<Markers, States, Idle>>, mut query: Query<&mut EntityData>) {
     warn!("{:?} entered idle state", event.entity);
