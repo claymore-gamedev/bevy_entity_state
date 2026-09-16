@@ -3,7 +3,17 @@ use std::marker::PhantomData;
 use bevy_ecs::prelude::*;
 
 pub mod prelude {
-    
+    pub use crate::{
+        entity_state,
+        change_state,
+        trigger_change_state,
+        trigger_enter_state,
+        trigger_exit_state,
+        EntityState,
+        EntityStateMarker,
+        EnterState,
+        ExitState
+    };
 }
 
 /// Trait that marks an enum as an entity state
@@ -26,8 +36,8 @@ where
 {
     _phantom_bundle: PhantomData<B>,
 
-    entity: Entity,
-    next_state: Option<E>,
+    pub entity: Entity,
+    pub next_state: Option<E>,
 }
 impl<B, E> ChangeState<B, E>
 where
@@ -51,7 +61,7 @@ where
     _phantom_state: PhantomData<E>,
     _phantom_marker: PhantomData<M>,
 
-    entity: Entity,
+    pub entity: Entity,
 }
 impl<B, E, M> EnterState<B, E, M>
 where
@@ -76,7 +86,7 @@ where
     _phantom_state: PhantomData<E>,
     _phantom_marker: PhantomData<M>,
 
-    entity: Entity,
+    pub entity: Entity,
 }
 impl<B, E, M> ExitState<B, E, M>
 where
