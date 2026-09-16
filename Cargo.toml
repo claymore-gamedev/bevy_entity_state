@@ -1,0 +1,20 @@
+[package]
+name = "bevy_entity_state"
+version = "0.1.0"
+authors = ["Nathan Frank <claymore@hadalyth.com>"]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+keywords = ["bevy", "state"]
+readme = "README.md"
+description = "A Bevy plugin to add minimal easy to read and reason about entity finite state machines"
+repository = "https://github.com/claymore_gamedev/bevy_entity_state"
+homepage = "https://github.com/claymore_gamedev/bevy_entity_state"
+documentation = "https://docs.rs/bevy_entity_state"
+categories = ["game-development"]
+
+[dependencies]
+bevy_ecs = { version = "0.19", default-features = false }
+bevy_app = { version = "0.19", default-features = false }
+
+[dev-dependencies]
+bevy = { version = "0.19", default-features = false }
