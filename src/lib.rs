@@ -11,7 +11,7 @@ pub mod prelude {
 
 /// Trait that marks an enum as an entity state
 pub trait EntityState: Component + Clone + Copy {
-    type EntityStateBundle : Bundle;
+    type EntityStateBundle: Bundle;
 
     /// Add the matching marker for the state
     fn add_marker(&self, entity: Entity, commands: &mut Commands);
@@ -36,7 +36,7 @@ where
     E: Component + EntityState,
 {
     pub fn new(entity: Entity, next_state: Option<E>) -> Self {
-        Self {entity, next_state }
+        Self { entity, next_state }
     }
 }
 
@@ -58,7 +58,7 @@ where
     M: Component + EntityStateMarker<E>,
 {
     fn new(entity: Entity) -> Self {
-        Self {_phantom_state: PhantomData, _phantom_marker: PhantomData, entity }
+        Self { _phantom_state: PhantomData, _phantom_marker: PhantomData, entity }
     }
 }
 
@@ -80,7 +80,7 @@ where
     M: Component + EntityStateMarker<E>,
 {
     fn new(entity: Entity) -> Self {
-        Self {_phantom_state: PhantomData, _phantom_marker: PhantomData, entity }
+        Self { _phantom_state: PhantomData, _phantom_marker: PhantomData, entity }
     }
 }
 
@@ -88,7 +88,7 @@ where
 #[allow(unused)]
 pub fn change_state<E>(event: On<ChangeState<E>>, mut commands: Commands)
 where
-    E : EntityState + Component,
+    E: EntityState + Component,
 {
     let entity = event.entity;
     let next_state = event.next_state;
@@ -121,10 +121,7 @@ pub fn trigger_change_state<
 
 /// Triggers all the events needed for a state enter from no state
 #[allow(unused)]
-pub fn trigger_enter_state<
-    E: Component + EntityState,
-    NextMarker: Component + EntityStateMarker<E> + Default,
->(
+pub fn trigger_enter_state<E: Component + EntityState, NextMarker: Component + EntityStateMarker<E> + Default>(
     entity: Entity,
     commands: &mut Commands,
 ) {
@@ -134,10 +131,7 @@ pub fn trigger_enter_state<
 
 /// Triggers all the events needed for a state exit into no state
 #[allow(unused)]
-pub fn trigger_exit_state<
-    E: Component + EntityState,
-    PreviousMarker: Component + EntityStateMarker<E> + Default,
->(
+pub fn trigger_exit_state<E: Component + EntityState, PreviousMarker: Component + EntityStateMarker<E> + Default>(
     entity: Entity,
     commands: &mut Commands,
 ) {
