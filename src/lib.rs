@@ -10,99 +10,90 @@ pub mod prelude {
 }
 
 /// Trait that marks an enum as an entity state
-pub trait EntityState<B: Bundle>: Component + Clone + Copy {
+pub trait EntityState: Component + Clone + Copy {
+    type EntityStateBundle : Bundle;
+
     /// Add the matching marker for the state
     fn add_marker(&self, entity: Entity, commands: &mut Commands);
 }
 
 /// Trait that marks a component as an entity state marker
-pub trait EntityStateMarker<B: Bundle, E: Component + EntityState<B>>: Component + Clone + Copy {
+pub trait EntityStateMarker<E: Component + EntityState>: Component + Clone + Copy {
     fn get_state() -> E;
 }
 
 /// Event that updates markers on entity when it changes state
 #[derive(EntityEvent)]
-pub struct ChangeState<B, E>
+pub struct ChangeState<E>
 where
-    B: Bundle,
-    E: Component + EntityState<B>,
+    E: Component + EntityState,
 {
-    _phantom_bundle: PhantomData<B>,
-
     pub entity: Entity,
     pub next_state: Option<E>,
 }
-impl<B, E> ChangeState<B, E>
+impl<E> ChangeState<E>
 where
-    B: Bundle,
-    E: Component + EntityState<B>,
+    E: Component + EntityState,
 {
     pub fn new(entity: Entity, next_state: Option<E>) -> Self {
-        Self { _phantom_bundle: PhantomData, entity, next_state }
+        Self {entity, next_state }
     }
 }
 
 /// Event that is triggered when an entity enters a state
 #[derive(EntityEvent)]
-pub struct EnterState<B, E, M>
+pub struct EnterState<E, M>
 where
-    B: Bundle,
-    E: Component + EntityState<B>,
-    M: Component + EntityStateMarker<B, E>,
+    E: Component + EntityState,
+    M: Component + EntityStateMarker<E>,
 {
-    _phantom_bundle: PhantomData<B>,
     _phantom_state: PhantomData<E>,
     _phantom_marker: PhantomData<M>,
 
     pub entity: Entity,
 }
-impl<B, E, M> EnterState<B, E, M>
+impl<E, M> EnterState<E, M>
 where
-    B: Bundle,
-    E: Component + EntityState<B>,
-    M: Component + EntityStateMarker<B, E>,
+    E: Component + EntityState,
+    M: Component + EntityStateMarker<E>,
 {
     fn new(entity: Entity) -> Self {
-        Self { _phantom_bundle: PhantomData, _phantom_state: PhantomData, _phantom_marker: PhantomData, entity }
+        Self {_phantom_state: PhantomData, _phantom_marker: PhantomData, entity }
     }
 }
 
 /// Event that is triggered when an entity exits a state
 #[derive(EntityEvent)]
-pub struct ExitState<B, E, M>
+pub struct ExitState<E, M>
 where
-    B: Bundle,
-    E: Component + EntityState<B>,
-    M: Component + EntityStateMarker<B, E>,
+    E: Component + EntityState,
+    M: Component + EntityStateMarker<E>,
 {
-    _phantom_bundle: PhantomData<B>,
     _phantom_state: PhantomData<E>,
     _phantom_marker: PhantomData<M>,
 
     pub entity: Entity,
 }
-impl<B, E, M> ExitState<B, E, M>
+impl<E, M> ExitState<E, M>
 where
-    B: Bundle,
-    E: Component + EntityState<B>,
-    M: Component + EntityStateMarker<B, E>,
+    E: Component + EntityState,
+    M: Component + EntityStateMarker<E>,
 {
     fn new(entity: Entity) -> Self {
-        Self { _phantom_bundle: PhantomData, _phantom_state: PhantomData, _phantom_marker: PhantomData, entity }
+        Self {_phantom_state: PhantomData, _phantom_marker: PhantomData, entity }
     }
 }
 
 /// Event observer that modifies entities marker components
 #[allow(unused)]
-pub fn change_state<B, T>(event: On<ChangeState<B, T>>, mut commands: Commands)
+pub fn change_state<E>(event: On<ChangeState<E>>, mut commands: Commands)
 where
-    B: Bundle,
-    T: EntityState<B> + Component,
+    E : EntityState + Component,
 {
     let entity = event.entity;
     let next_state = event.next_state;
     let entity_commands = &mut commands.entity(entity);
-    entity_commands.remove::<B>();
+    entity_commands.remove::<E::EntityStateBundle>();
 
     let Some(next_state) = next_state else {
         return;
@@ -116,63 +107,57 @@ where
 /// between two states
 #[allow(unused)]
 pub fn trigger_change_state<
-    B: Bundle,
-    E: EntityState<B>,
-    PreviousMarker: EntityStateMarker<B, E> + Default,
-    NextMarker: EntityStateMarker<B, E> + Default,
+    E: EntityState,
+    PreviousMarker: EntityStateMarker<E> + Default,
+    NextMarker: EntityStateMarker<E> + Default,
 >(
     entity: Entity,
     commands: &mut Commands,
 ) {
-    commands.trigger(ChangeState::<B, E>::new(entity, Some(NextMarker::get_state())));
-    commands.trigger(ExitState::<B, E, PreviousMarker>::new(entity));
-    commands.trigger(EnterState::<B, E, NextMarker>::new(entity));
+    commands.trigger(ChangeState::<E>::new(entity, Some(NextMarker::get_state())));
+    commands.trigger(ExitState::<E, PreviousMarker>::new(entity));
+    commands.trigger(EnterState::<E, NextMarker>::new(entity));
 }
 
 /// Triggers all the events needed for a state enter from no state
 #[allow(unused)]
 pub fn trigger_enter_state<
-    B: Bundle,
-    E: Component + EntityState<B>,
-    NextMarker: Component + EntityStateMarker<B, E> + Default,
+    E: Component + EntityState,
+    NextMarker: Component + EntityStateMarker<E> + Default,
 >(
     entity: Entity,
     commands: &mut Commands,
 ) {
-    commands.trigger(ChangeState::<B, E>::new(entity, Some(NextMarker::get_state())));
-    commands.trigger(EnterState::<B, E, NextMarker>::new(entity));
+    commands.trigger(ChangeState::<E>::new(entity, Some(NextMarker::get_state())));
+    commands.trigger(EnterState::<E, NextMarker>::new(entity));
 }
 
 /// Triggers all the events needed for a state exit into no state
 #[allow(unused)]
 pub fn trigger_exit_state<
-    B: Bundle,
-    E: Component + EntityState<B>,
-    PreviousMarker: Component + EntityStateMarker<B, E> + Default,
+    E: Component + EntityState,
+    PreviousMarker: Component + EntityStateMarker<E> + Default,
 >(
     entity: Entity,
     commands: &mut Commands,
 ) {
-    commands.trigger(ChangeState::<B, E>::new(entity, Some(PreviousMarker::get_state())));
-    commands.trigger(ExitState::<B, E, PreviousMarker>::new(entity));
+    commands.trigger(ChangeState::<E>::new(entity, Some(PreviousMarker::get_state())));
+    commands.trigger(ExitState::<E, PreviousMarker>::new(entity));
 }
 
 /// Macro for defining the states
 #[macro_export]
 macro_rules! entity_state {
     (
-        bundle_name : $bundle_name:ident,
         enum_name : $enum_name:ident,
         enum_variant_names : [$($enum_variant_name:ident),* $(,)?]
     ) => {
-        // Create the bundle
-        type $bundle_name = ($($enum_variant_name,)*);
 
         // Create the markers
         $(
             #[derive(Component, Debug, Clone, Copy, Default)]
             pub struct $enum_variant_name;
-            impl EntityStateMarker<$bundle_name, $enum_name> for $enum_variant_name {
+            impl EntityStateMarker<$enum_name> for $enum_variant_name {
                 fn get_state() -> $enum_name {
                     $enum_name::$enum_variant_name
                 }
@@ -184,7 +169,10 @@ macro_rules! entity_state {
         pub enum $enum_name {
             $($enum_variant_name),*
         }
-        impl EntityState<$bundle_name> for $enum_name {
+        impl EntityState for $enum_name {
+            // Create the bundle
+            type EntityStateBundle = ($($enum_variant_name,)*);
+
             fn add_marker(&self, entity: Entity, commands: &mut Commands) {
                 let mut entity_commands = commands.entity(entity);
                 match self {

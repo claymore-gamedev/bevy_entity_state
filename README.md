@@ -21,7 +21,6 @@ use bevy_entity_state::prelude::*;
 /// a bundle containing all the markers, and implements the EntityState\EntityStateMarker
 /// traits for the enum and markers respectively.
 entity_state!(
-    bundle_name:Markers,
     enum_name:States,
     enum_variant_names: [
         Idle,
@@ -42,7 +41,7 @@ impl Plugin for TestPlugin {
     fn build(&self, app: &mut App) {
         // WARN: This observer is required.  It handles updating the markers 
         // On an entity when its state is changed.
-        app.add_observer(change_state::<Markers, States>);
+        app.add_observer(change_state::<States>);
 
         // Setup of idle state
         app.add_observer(on_enter_idle);
@@ -66,12 +65,12 @@ fn test(mut commands: Commands) {
     // WARN: The initial state of the entity is configured by emitting an enter event
     // for the initial state.  This also means the first update won't be called until the next time commands
     // are executed, but what can you do?  Life's unfair and I'm willing to make that sacrifice.
-    trigger_enter_state::<Markers, States, Idle>(entity, &mut commands);
+    trigger_enter_state::<States, Idle>(entity, &mut commands);
 }
 
 // IDLE STATE SYSTEMS.  You could put these in a different plugin or move the functions to a different file
 
-fn on_enter_idle(event: On<EnterState<Markers, States, Idle>>, mut query: Query<&mut EntityData>) {
+fn on_enter_idle(event: On<EnterState<States, Idle>>, mut query: Query<&mut EntityData>) {
     warn!("{:?} entered idle state", event.entity);
     let Ok(mut entity_data) = query.get_mut(event.entity) else {
         return;
@@ -79,7 +78,7 @@ fn on_enter_idle(event: On<EnterState<Markers, States, Idle>>, mut query: Query<
     entity_data.state_timer = Timer::new(Duration::from_secs_f32(5.0), TimerMode::Once);
 }
 
-fn on_exit_idle(event: On<ExitState<Markers, States, Idle>>) {
+fn on_exit_idle(event: On<ExitState<States, Idle>>) {
     warn!("{:?} exited idle state", event.entity);
 }
 
@@ -92,13 +91,13 @@ fn update_idle_state(time: Res<Time>, query: Query<(Entity, &mut EntityData), Wi
 
         // WARN: This is how you trigger a state transition.  You call this function with 4 generic arguments,
         // The marker bundle, the state enum, the current state marker, and the next state marker.
-        trigger_change_state::<Markers, States, Idle, Wander>(entity, &mut commands);
+        trigger_change_state::<States, Idle, Wander>(entity, &mut commands);
     }
 }
 
 // WANDER STATE SYSTEMS.  You could put these in a different plugin or move the functions to a different file
 
-fn on_enter_wander(event: On<EnterState<Markers, States, Wander>>, mut query: Query<&mut EntityData>) {
+fn on_enter_wander(event: On<EnterState<States, Wander>>, mut query: Query<&mut EntityData>) {
     warn!("{:?} entered wander state", event.entity);
     let Ok(mut entity_data) = query.get_mut(event.entity) else {
         return;
@@ -106,7 +105,7 @@ fn on_enter_wander(event: On<EnterState<Markers, States, Wander>>, mut query: Qu
     entity_data.state_timer = Timer::new(Duration::from_secs_f32(5.0), TimerMode::Once);
 }
 
-fn on_exit_wander(event: On<ExitState<Markers, States, Wander>>) {
+fn on_exit_wander(event: On<ExitState<States, Wander>>) {
     warn!("{:?} exited wander state", event.entity);
 }
 
@@ -118,7 +117,7 @@ fn update_wander_state(time: Res<Time>, query: Query<(Entity, &mut EntityData), 
         }
 
         // See previous warning.
-        trigger_change_state::<Markers, States, Wander, Idle>(entity, &mut commands);
+        trigger_change_state::<States, Wander, Idle>(entity, &mut commands);
     }
 }
 ```
