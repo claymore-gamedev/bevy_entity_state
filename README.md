@@ -17,9 +17,7 @@ I would still consider myself an amatuer at coding in Rust, especially Bevy, but
 use bevy::prelude::*;
 use bevy_entity_state::prelude::*;
 
-/// This macro creates an enum, markers for each variant of the enum, 
-/// a bundle containing all the markers, and implements the EntityState\EntityStateMarker
-/// traits for the enum and markers respectively.
+/// This macro creates all the needed components.
 entity_state!(
     enum_name:States,
     enum_variant_names: [
@@ -89,8 +87,8 @@ fn update_idle_state(time: Res<Time>, query: Query<(Entity, &mut EntityData), Wi
             continue;
         }
 
-        // WARN: This is how you trigger a state transition.  You call this function with 4 generic arguments,
-        // The marker bundle, the state enum, the current state marker, and the next state marker.
+        // WARN: This is how you trigger a state transition.  You call this function with 3 generic arguments,
+        // The state enum, the current state marker, and the next state marker.
         trigger_change_state::<States, Idle, Wander>(entity, &mut commands);
     }
 }

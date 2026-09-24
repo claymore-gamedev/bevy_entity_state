@@ -2,6 +2,7 @@ use std::marker::PhantomData;
 
 use bevy_ecs::prelude::*;
 
+/// Prelude of all needed functions, traits, and structs.
 pub mod prelude {
     pub use crate::{
         EnterState, EntityState, EntityStateMarker, ExitState, change_state, entity_state, trigger_change_state,
