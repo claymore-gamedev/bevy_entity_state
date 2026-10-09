@@ -13,4 +13,4 @@ documentation = "https://docs.rs/bevy_entity_state"
 categories = ["game-development"]
 
 [dependencies]
-bevy_ecs = { version = "0.19", default-features = false }
+bevy_ecs = { version = "0.19.1", default-features = false }
